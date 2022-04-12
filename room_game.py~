@@ -79,7 +79,7 @@ They are three doors in front of you : {room.rooms[position][0]}, {room.rooms[po
 			pass
 
 	if position == room.finish_room:
-		print(f"Congratulation, you find the finish room in {n_try} try !")
+		print("Congratulation, you find the finish room !")
 		choice = input("Play again ? [Y/n] ")
 		if choice == "Y":
 			main()
