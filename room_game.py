@@ -1,6 +1,9 @@
 import os
 from random import randint
 
+#Global var for stop the dfs function
+find_path = False
+
 class Rooms:
 	def __init__(self, n):
 		self.numbers = n
@@ -8,12 +11,8 @@ class Rooms:
 		self.finish_room = self.set_finish_room()
 		self.n_connect = 3
 		self.rooms = self.generate_rooms()
-		self.number_path = self.link_rooms()
-
-		# Commented line until finding a better algo to find the paths in the graph
-		# while self.number_path == 0 or self.number_path > self.numbers:
-		while self.number_path == 0:
-			self.number_path = self.link_rooms()
+		self.link_rooms()
+		self.traps = self.trap_rooms()
 
 
 	def generate_rooms(self):
@@ -27,7 +26,11 @@ class Rooms:
 			for y in range(self.n_connect):
 				self.rooms[x][y] = randint(0, self.numbers - 1)
 				self.rooms[self.rooms[x][y]][randint(0, self.n_connect - 1)] = x
-		return self.dfs(self.rooms, self.start_room, frozenset(), self.finish_room)
+		self.number_path = self.dfs(self.rooms, self.start_room, frozenset(), self.finish_room)
+		if self.number_path == 0:
+			self.link_rooms()
+		else:
+			find_path = False
 
 
 	def set_finish_room(self):
@@ -38,9 +41,16 @@ class Rooms:
 		else:
 			return finish_room
 
+
 	def trap_rooms(self):
 		"""Define the trap's rooms"""
-		pass
+		return [randint(0, self.numbers - 1)]
+
+
+	def trap(self, p):
+		if p in self.traps:
+			self.link_rooms()
+			print(f"This room is a trap, all connection have change !")
 
 
 	def bonus_rooms(self):
@@ -50,7 +60,11 @@ class Rooms:
 
 	def dfs(self, g, node, visit, finish_room):
 		"""Deep first search algo for check if a path exist"""
+		global find_path
+		if find_path == True:
+			return 0
 		if node == finish_room:
+			find_path = True
 			return 1
 		if node in visit:
 			return 0
@@ -60,14 +74,25 @@ class Rooms:
 
 
 def main():
-	# It's hard to put more than 40 rooms beacause after dfs algo it's too long to find one all path
-	room = Rooms(10)
+	os.system('cls' if os.name == 'nt' else 'clear')
+	try:
+		n_room = int(input('In how many rooms do you want play (Min. 10 | Max. 200) ? '))
+		if 9 < n_room < 201:
+			room = Rooms(n_room)
+		else:
+			main()
+	except:
+		main()
+
 	position = room.start_room
 	n_try = 0
 	while position != room.finish_room:
 		os.system('cls' if os.name == 'nt' else 'clear')
+		# DEV MODE
+		print (f"The trap room is {room.traps}, the exit is {room.finish_room}")
 		print(f"""You are in the room {position}.
 They are three doors in front of you : {room.rooms[position][0]}, {room.rooms[position][1]}, {room.rooms[position][2]}.""")
+		room.trap(position)
 		try:
 			v = int(input('What door you choose ? '))
 			if v in room.rooms[position]:
@@ -88,3 +113,6 @@ They are three doors in front of you : {room.rooms[position][0]}, {room.rooms[po
 
 if __name__ == "__main__":
 	main()
+
+
+	
